@@ -14,14 +14,22 @@
           <ul class="list-unstyled components">
               <li><router-link to="/"><font-awesome-icon icon="home"/><br v-show="isCollapsed"> Главная</router-link></li>
               <li><router-link to="/products"><font-awesome-icon icon="list"/><br v-show="isCollapsed"> Каталог</router-link></li>
-              <li><router-link to="/cart"><font-awesome-icon icon="shopping-cart"/><br v-show="isCollapsed"> Корзина</router-link></li>
+              <li><router-link to="/cart"><font-awesome-icon icon="shopping-cart"/><br v-show="isCollapsed"> Корзина <span v-if="cartProducts.length > 0">({{ cartProducts.length }})</span></router-link></li>
               <li><router-link to="/contacts"><font-awesome-icon icon="phone"/><br v-show="isCollapsed"> Контакты</router-link></li>
               <li><router-link to="/signin"><font-awesome-icon icon="user"/><br v-show="isCollapsed"> Войти</router-link></li>
           </ul>
       </div>
-
+    
+      <div class="container-fluid">
       <div id="content">
-          <router-view/>
+        
+        <router-view 
+        @added-to-cart="addToCart" 
+        @deleted-from-cart="deleteFromCart"
+        @cart-empty="emptyCart"
+        
+        :cart-products="cartProducts"/>
+        </div>
       </div>
     </div>  
   </div>
@@ -32,13 +40,36 @@ export default{
   name: 'app',
   data(){
     return {
-      isCollapsed: true
+      isCollapsed: true,
+      cartProducts: []
     }
   },
   methods: {
     sidebarToggle: function() {
         this.isCollapsed = !this.isCollapsed;
         console.log("Sidebar toggled " + this.isCollapsed)
+    },
+    emptyCart: function(){
+        this.cartProducts = [];
+    },
+    addToCart: function(product) {
+        let isInCart = false;
+        this.cartProducts.forEach(item => {
+            if(item.id == product.id){
+                if(item.orderQuantity + product.orderQuantity <= item.quantity)
+                    item.orderQuantity += product.orderQuantity;
+                isInCart = true;
+            }
+        });
+        if(!isInCart)
+            this.cartProducts.push(product);
+        
+        console.log("App.vue - addToCart called");
+        console.log(product);
+        
+    },
+    deleteFromCart: function(index){
+        this.cartProducts.splice(index, 1);
     }
   }
 }
