@@ -9,12 +9,8 @@
 **URL**: /products/  
 **Method:** `GET`  
 **URL Params:** отсутствуют  
-**Success Response:** `[{"id":"1","name":"1234567890AAA01","caption":"Куртка","description":"Синяя куртка","price":"1000","quantity":"2","producttype_name":"clothes","producttype_caption":"одежда","orderQuantity":1,"photos":[{"id":"3","server":"http://catalogueApi/photos/","filename":"1234567890AAA012.jpg"}`
-**Sample Call:** ```javascript
-this.axios.get('/products/').then(response => {
-      this.products = response.data;
-    })
-  ```
+**Success Response:** `[{"id":"1","name":"1234567890AAA01","caption":"Куртка","description":"Синяя куртка","price":"1000","quantity":"2","producttype_name":"clothes","producttype_caption":"одежда","orderQuantity":1,"photos":[{"id":"3","server":"http://catalogueApi/photos/","filename":"1234567890AAA012.jpg"}`  
+**Sample Call:** `javascript this.axios.get('/products/').then(response => { this.products = response.data;})`  
 
 ## Установка
 
