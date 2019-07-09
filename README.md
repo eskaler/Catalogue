@@ -1,5 +1,12 @@
 # catalogue
 
+## sql
+
+**Oracle 11g2**
+
+[./sql/db.sql](Скрипт БД)
+[./sql/UML_Catalogue.pdf](ER-диаграмма)
+
 ## api
 
 ### Товары
