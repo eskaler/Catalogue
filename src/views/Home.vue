@@ -1,6 +1,6 @@
 <template>
-  <div class="home">
-    <h1>Добро пожаловать в систему!</h1>    
+  <div class="home m-4">
+    <h3>Добро пожаловать в систему!</h3>
   </div>
 </template>
 

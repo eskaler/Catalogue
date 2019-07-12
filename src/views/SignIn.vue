@@ -1,5 +1,7 @@
 <template>
-  <h1>Войти в систему</h1>
+  <div class="signin m-4">
+    <h3>Войти в систему</h3>
+  </div>
 </template>
 <script>
 export default {

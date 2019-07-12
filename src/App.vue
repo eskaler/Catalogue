@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <div class="wrapper">
+    <div class="wrapper page">
     <!-- Sidebar -->
       <div :class="{active: isCollapsed}" class="sidebar">
           <div class="sidebar-header">
@@ -23,13 +23,15 @@
       <div class="container-fluid">
       <div id="content">
         
-        <router-view 
-        @added-to-cart="addToCart" 
-        @deleted-from-cart="deleteFromCart"
-        @cart-empty="emptyCart"
-        
-        :cart-products="cartProducts"
-        :api-prefix="apiPrefix" />
+        <transition name="router-anim">
+            <router-view 
+            @added-to-cart="addToCart" 
+            @deleted-from-cart="deleteFromCart"
+            @cart-empty="emptyCart"
+            
+            :cart-products="cartProducts"
+            :api-prefix="apiPrefix" />
+        </transition>
         </div>
       </div>
     </div>  
@@ -205,5 +207,38 @@ ul ul a {
     font-size: 0.9em !important;
     padding-left: 30px !important;
     background: var(--colors-sidebar-background);
+}
+
+
+/* router-anim*/
+
+
+.router-anim-enter-active {
+  animation: coming .1s;
+  animation-delay: .5s;
+  opacity: 0;
+}
+.router-anim-leave-active {
+  animation: going .1s;
+}
+
+@keyframes going {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+}
+@keyframes coming {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 </style>
