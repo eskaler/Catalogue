@@ -70,17 +70,17 @@
                   
               </div>
 
-              <div class="card-footer bg-transparent d-flex justify-content-between">
-                <span>В наличии:
-                  <strong class="font-weight-bold">{{ item.quantity }}</strong>
-                </span>
-                <div>
-                  Цена:
-                  <strong class="text-primary font-weight-bold">{{ item.price}}<font-awesome-icon icon="ruble-sign"/></strong>
-                </div>
-              </div>       
+                <div class="card-footer bg-transparent d-flex justify-content-between">
+                  <span>В наличии:
+                    <strong class="font-weight-bold">{{ item.quantity }}</strong>
+                  </span>
+                  <div>
+                    Цена:
+                    <strong class="text-primary font-weight-bold">{{ item.price}}<font-awesome-icon icon="ruble-sign"/></strong>
+                  </div>
+                </div>       
               </div>
-                        </template>
+            </template>
         <!--/.Card-->
           </div>
         </div>
@@ -91,6 +91,7 @@
 
 <script>
 export default {
+  props: ['apiPrefix'],
   data() {
     return {
       loading: false,
@@ -106,7 +107,7 @@ export default {
   mounted() {
     this.loading = true;
     this.axios
-    .get('/products/')
+    .get(this.apiPrefix + 'api/product/all')
     .then(response => {
       this.products = response.data;
     })

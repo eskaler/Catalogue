@@ -28,7 +28,8 @@
         @deleted-from-cart="deleteFromCart"
         @cart-empty="emptyCart"
         
-        :cart-products="cartProducts"/>
+        :cart-products="cartProducts"
+        :api-prefix="apiPrefix" />
         </div>
       </div>
     </div>  
@@ -41,7 +42,8 @@ export default{
   data(){
     return {
       isCollapsed: true,
-      cartProducts: []
+      cartProducts: [],
+      apiPrefix: "http://localhost:8000/"
     }
   },
   methods: {
