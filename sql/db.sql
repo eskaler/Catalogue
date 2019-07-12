@@ -1,5 +1,5 @@
 prompt PL/SQL Developer Export User Objects for user SHOP@LOCALHOST:1521/XE
-prompt Created by Alexey on 9 РСЋР»СЊ 2019 Рі.
+prompt Created by Alexey on 12 РСЋР»СЊ 2019 Рі.
 set define off
 spool db.log
 
@@ -34,8 +34,9 @@ create table CRM_ORDER
   id_order        NUMBER not null,
   s_customername  VARCHAR2(100) not null,
   s_customerphone VARCHAR2(11) not null,
-  d_created       DATE not null,
-  id_orderstate   NUMBER not null
+  d_created       DATE default SYSDATE not null,
+  id_orderstate   NUMBER default 1 not null,
+  d_expires       DATE default SYSDATE + 15 not null
 )
 ;
 comment on table CRM_ORDER
@@ -50,6 +51,8 @@ comment on column CRM_ORDER.d_created
   is 'дата создания заказа';
 comment on column CRM_ORDER.id_orderstate
   is 'ид состояния заказа';
+comment on column CRM_ORDER.d_expires
+  is 'дата отмены заказа, если он не будет закрыт к тому моменту';
 alter table CRM_ORDER
   add constraint ID_ORDER primary key (ID_ORDER);
 alter table CRM_ORDER
@@ -111,7 +114,7 @@ create table CRM_PRODUCT
   s_caption      VARCHAR2(50) not null,
   s_description  VARCHAR2(1000),
   n_qty          NUMBER not null,
-  f_price        FLOAT(2) not null,
+  f_price        FLOAT not null,
   d_created      DATE default SYSDATE not null,
   id_createdby   NUMBER not null,
   d_edited       DATE default SYSDATE,
@@ -249,7 +252,7 @@ prompt
 create sequence SEQ_ORDER
 minvalue 1
 maxvalue 9999999999999999999999999999
-start with 1
+start with 39
 increment by 1
 cache 20;
 
@@ -260,7 +263,7 @@ prompt
 create sequence SEQ_ORDERPRODUCT
 minvalue 1
 maxvalue 9999999999999999999999999999
-start with 1
+start with 35
 increment by 1
 cache 20;
 
@@ -359,6 +362,45 @@ select
 
   from CRM_PRODUCT
   join CRM_PRODUCTTYPE using (id_producttype);
+
+prompt
+prompt Creating function CRM_ORDER_INSERT
+prompt ==================================
+prompt
+create or replace function crm_order_insert(
+       sp_customerName in varchar2, 
+       sp_customerPhone in varchar2) 
+       return number is idv_newOrder number;
+begin
+  idv_newOrder := SEQ_ORDER.nextval;
+  insert into CRM_ORDER (ID_ORDER, S_CUSTOMERNAME, S_CUSTOMERPHONE)
+    values (idv_newOrder, sp_customerName, sp_customerPhone);
+  commit;
+  return idv_newOrder;
+end crm_order_insert;
+/
+
+prompt
+prompt Creating function CRM_ORDERPRODUCT_INSERT
+prompt =========================================
+prompt
+create or replace function crm_orderproduct_insert(idp_order in number, idp_product in number, np_qty in number) return number is
+  idv_orderproduct number;
+begin
+  idv_orderproduct := SEQ_ORDERPRODUCT.nextval;                   
+  insert into CRM_ORDERPRODUCT (ID_ORDERPRODUCT,
+                                ID_ORDER,
+                                ID_PRODUCT,
+                                N_QTY)
+  values (idv_orderproduct,
+  idp_order,
+  idp_product,
+  np_qty);
+  update CRM_PRODUCT set CRM_PRODUCT.N_QTY = (CRM_PRODUCT.N_QTY - np_qty) WHERE CRM_PRODUCT.ID_PRODUCT = idp_product;
+  commit;
+  return(idv_orderproduct);
+end crm_orderproduct_insert;
+/
 
 
 prompt Done
