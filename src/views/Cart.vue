@@ -4,7 +4,8 @@
       <span v-if="cartProducts.length == 0"> пуста. Добавьте товары из каталога.</span>
       <span v-else>:</span>
       </h3> 
-    <table class="table" v-if="cartProducts.length > 0">
+    <div ref="orderTable">
+    <table class="table" v-if="cartProducts.length > 0" >
       <thead >
         <tr>
           <th scope="col">#</th>
@@ -42,7 +43,7 @@
         </tr>
       </thead>
       </table>
-
+    </div>
   <div class="container" v-if="cartProducts.length > 0">
     <div class="row">
       <div class="col-md-6 mb-4">
@@ -63,6 +64,11 @@
 </template>
 
 <script>
+
+import pdfMake from "pdfmake/build/pdfmake";
+import pdfFonts from "pdfmake/build/vfs_fonts";
+pdfMake.vfs = pdfFonts.pdfMake.vfs;
+
 export default {
   props: ['cartProducts', 'apiPrefix'],
   data(){
@@ -90,10 +96,42 @@ export default {
           })
           .finally(() => { this.generateOrderDocument(); });
       }
+      this.generateOrderDocument();
     },
     generateOrderDocument: function(){
-      if(this.apiResponse != null)
-        alert(`Заказ №${this.apiResponse.idOrder} успешно зарешистрирован!`);
+      if(this.apiResponse != null){
+        console.log(pdfMake);
+        let tableContents = [];
+        tableContents.push(["№", "Артикул", "Наименование", "Цена", "Кол-во", "Стоимость"]);
+        let i = 1;
+        this.cartProducts.forEach(product => {
+          tableContents.push([++i, product["name"], product["caption"], product["price"],
+                              product["orderQuantity"], product["price"]*product["orderQuantity"]]);
+        });
+        
+        let docDefinition = {
+          content: [
+            { text : `Ваш заказ №${this.apiResponse.idOrder} успешно зарегистрирован!`, fontSize: 30 },
+            { text : 'Сохраните данный документ для предъявления продавцу при оплате заказа!', color: 'red'},
+            { text : `ФИО: ${this.customerName}`, fontSize: 15 },
+            { text : `Номер телефона: ${this.customerPhone}`, fontSize: 15 },
+
+            {
+              layout: 'lightHorizontalLines',
+              table: {
+                headerRows: 1,
+                widths: [ 20, 'auto', 'auto', 'auto', 'auto', 'auto'],
+                body: tableContents
+              }
+            },
+            { text: `Сумма заказа: ${this.cartSum}₽`, fontSize : 15 }
+          ],
+        };
+        console.log(docDefinition);
+        pdfMake.createPdf(docDefinition).download(`Заказ${this.apiResponse.idOrder}.pdf`);
+        this.emptyCart();
+      }
+        
       return;
     },
     deleteFromCart: function(index){
