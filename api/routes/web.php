@@ -14,6 +14,17 @@
 $router->group(['prefix' => 'api/product'], function () use ($router) {
     
     $router->get('all', 'ProductController@all');
+    $router->get('search/caption/{caption}/pricemin/{pricemin}/pricemax/{pricemax}/producttype/{producttype}',
+    'ProductController@search');
+    $router->get('searchname/caption/{caption}',
+    'ProductController@searchname');
+
+});
+
+$router->group(['prefix' => 'api/producttype'], function () use ($router) {
+    
+    $router->get('all', 'ProductTypeController@all');
+    
 
 });
 

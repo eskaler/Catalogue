@@ -16,8 +16,52 @@
       {{ error }}
     </div>
 
-    <div class="content m-4" v-if="products">
-      <div class="card-deck">
+    <div class="content" v-if="productTypes && products">
+
+      <div class="search-bar ml-4">
+        <div class="row">
+          <div class="form-group col-xs-4 col-md4 m-2">
+            <div class="d-flex flex-column">
+              <label for="nameInput" class="control-lable">Наименование</label>
+              <input type="text" name="" id="nameInput" v-model="productCaption">
+            </div>
+          </div>     
+          <div class="form-group col-xs-4 col-md4 m-2">
+            <div class="d-flex flex-column">
+              <label for="productTypeList" class="control-label" >Категория</label>
+               <select v-model="selectedProductType" id="productTypeList" class="form-control">
+                  <option value="any" selected>Любая</option>
+                  <option v-for="(item, index) in productTypes" :value="item.name" :key="item.name + index">
+                   {{ item.caption }}
+                  </option>
+               </select>
+            </div>
+          </div>
+          <div class="form-group col-xs-4 col-md4 m-2">
+            <div class="d-flex flex-column">
+              <label for="priceMin" class="control-label">Цена от</label>
+              <input type="number"  oninput="validity.valid||(value='');" id="" v-model.number="priceMin">
+            </div>
+          </div>
+          <div class="form-group col-xs-4 col-md4 m-2">
+            <div class="d-flex flex-column">
+              <label for="priceMax" class="control-label" >Цена до</label>
+              <input type="number"  oninput="validity.valid||(value='');" id="" v-model.number="priceMax">
+            </div>
+          </div>
+          <div class="form-group col-xs-4 col-md4 m-3">
+            <div class="d-flex flex-column">
+              <p></p>
+              <button type="submit" class="btn btn-outline-default" @click="searchProducts()"><font-awesome-icon icon="search"/> ПОИСК</button>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+
+      
+
+      <div class="card-deck m-2">
 
         <!--Card-->
         <template v-for="(item, index) in products">
@@ -53,15 +97,12 @@
               <p class="card-text">{{ item.description }}</p>          
             </div>
 
-            
               <div class="input-group m-3">
-                <input class="form-control" type="number" value="1" min="1" :max="item.quantity" oninput="validity.valid||(value='');" id="example-number-input" v-model="item.orderQuantity">
+                <input class="form-control" style="width: 10%;" type="number" value="1" min="1" :max="item.quantity" oninput="validity.valid||(value='');" id="example-number-input" v-model="item.orderQuantity">
                 <div class="input-group-addon">
                   <button class="btn btn-block btn-primary" @click="addToCart(item)"><font-awesome-icon icon="cart-plus"/> В КОРЗИНУ</button>    
                 </div>  
               </div>
-            
-
             
             <!--Footer-->
             <div class="card-footer bg-transparent d-flex justify-content-between">
@@ -75,46 +116,77 @@
             </div>    
 
           </div>
-
           <div :key="'divider-sm-'+index" v-if="(index + 1) % 2 == 0" class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 2 on sm--></div>          
           <div :key="'divider-md-'+index" v-if="(index + 1) % 3 == 0" class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
           <div :key="'divider-lg-'+index" v-if="(index + 1) % 4 == 0" class="w-100 d-none d-lg-block d-xl-none"><!-- wrap every 4 on lg--></div>
           <div :key="'divider-xl-'+index" v-if="(index + 1) % 5 == 0" class="w-100 d-none d-xl-block"><!-- wrap every 5 on xl--></div>
           
-          
-          
         </template>
         <!--/.Card-->
           </div>
         </div>
-      </div>
+        </div>
+      
 </template>
 
 <script>
 
-/*
-
-          
-          
-          
-
-*/
 export default {
   props: ['apiPrefix'],
   data() {
     return {
       loading: false,
       products: null,
-      error: null
+      productTypes: null,
+      error: null,
+      
+      productCaption: null,
+      selectedProductType: "any",
+      priceMin: 0,
+      priceMax: 0,
+
     }
   },
   methods:{
     addToCart: function(product) {
       this.$emit('added-to-cart', product);
+    },
+    searchProducts: function() {
+      let apiQuery = `api/product/search/caption/${this.getProductCaption}/pricemin/${this.getPriceMin}/pricemax/${this.getPriceMax}/producttype/${this.selectedProductType}`;
+      console.log(apiQuery);
+      this.axios
+      .get(this.apiPrefix + apiQuery
+      )
+      .then(response => {
+        this.products = response.data;
+      })
+      .finally(() =>(this.loading = false));
+    }
+    
+  },
+  computed: {
+    getProductCaption: function() {
+      return (this.productCaption == '' || this.productCaption == null) ? "nocaption" : this.productCaption;
+    },
+    getPriceMin: function() {
+      return (this.priceMin == null || this.priceMin == '' || this.priceMin < 0 ) ? 0 : this.priceMin;
+    },
+    getPriceMax: function() {
+      if(this.priceMax == 0 || this.priceMax < this.priceMin)
+        return 999999;
+      else
+        return (this.priceMax == null || this.priceMax == '' || this.priceMax < 0) ? 0 : this.priceMax;
     }
   },
   mounted() {
     this.loading = true;
+    
+    this.axios
+    .get(this.apiPrefix + 'api/producttype/all')
+    .then(response => {
+      this.productTypes = response.data;
+    })
+
     this.axios
     .get(this.apiPrefix + 'api/product/all')
     .then(response => {
@@ -131,6 +203,10 @@ export default {
     width: 100%;
     height: 15vw;
     object-fit: cover;
+}
+
+.search-bar{
+  
 }
 </style>
 
