@@ -166,7 +166,7 @@ export default {
   },
   computed: {
     getProductCaption: function() {
-      return (this.productCaption == '' || this.productCaption == null) ? "nocaption" : this.productCaption;
+      return (this.productCaption == '' || this.productCaption == null) ? "any" : this.productCaption;
     },
     getPriceMin: function() {
       return (this.priceMin == null || this.priceMin == '' || this.priceMin < 0 ) ? 0 : this.priceMin;

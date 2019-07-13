@@ -23,7 +23,7 @@ class ProductController extends Controller
             die(); 
         } 
 
-        $caption = $caption == "nocaption" ? "%%" : "%" . urldecode($caption) . "%";
+        $caption = $caption == "any" ? "%%" : "%" . urldecode($caption) . "%";
 
 
         $producttype = $producttype == "any" ? "%%" : $producttype;
