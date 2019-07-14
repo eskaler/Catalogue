@@ -232,6 +232,7 @@ export default {
     width: 100%;
     height: 15vw;
     object-fit: cover;
+    cursor: zoom-in;
 }
 
 .search-bar{

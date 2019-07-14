@@ -21,15 +21,29 @@ export default new Router({
       name: 'contacts',
       component: () => import(/* webpackChunkName: "contacts" */ './views/Contacts.vue')
     },
-    {
-      path: '/signin',
-      name: 'singin',
-      component: () => import(/* webpackChunkName: "contacts" */ './views/SignIn.vue')
-    },
+    
     {
       path: '/cart',
       name: 'cart',
       component: () => import(/* webpackChunkName: "contacts" */ './views/Cart.vue')
-    }
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import(/* webpackChunkName: "contacts" */ './views/Admin.vue'),
+      children: [
+        {
+          path: 'signin',
+          name: 'singin',
+          component: () => import(/* webpackChunkName: "contacts" */ './views/SignIn.vue')
+        },
+        {
+          path: 'panel',
+          name: 'panel',
+          component: () => import(/* webpackChunkName: "contacts" */ './views/Panel.vue')
+        },
+      ]
+    },
+    
   ]
 })

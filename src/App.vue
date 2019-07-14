@@ -16,7 +16,7 @@
               <li><router-link to="/products"><font-awesome-icon icon="list"/><br v-show="isCollapsed"> Каталог</router-link></li>
               <li><router-link to="/cart"><font-awesome-icon icon="shopping-cart"/><br v-show="isCollapsed"> Корзина <span v-if="cartProducts.length > 0">({{ cartProducts.length }})</span></router-link></li>
               <li><router-link to="/contacts"><font-awesome-icon icon="phone"/><br v-show="isCollapsed"> Контакты</router-link></li>
-              <li><router-link to="/signin"><font-awesome-icon icon="user"/><br v-show="isCollapsed"> Войти</router-link></li>
+              <li><router-link to="/admin"><font-awesome-icon icon="user"/><br v-show="isCollapsed"> Войти</router-link></li>
           </ul>
       </div>
     
@@ -28,9 +28,11 @@
             @added-to-cart="addToCart" 
             @deleted-from-cart="deleteFromCart"
             @cart-empty="emptyCart"
+            @signed-in="signedIn"
             
             :cart-products="cartProducts"
-            :api-prefix="apiPrefix" />
+            :api-prefix="apiPrefix" 
+            :api-key="apiKey"/>
         </transition>
         </div>
       </div>
@@ -45,10 +47,14 @@ export default{
     return {
       isCollapsed: true,
       cartProducts: [],
-      apiPrefix: "http://localhost:8000/"
+      apiPrefix: "http://localhost:8000/",
+      apiKey: null
     }
   },
   methods: {
+    signedIn: function(apiKey){
+        this.apiKey = apiKey;
+    },
     sidebarToggle: function() {
         this.isCollapsed = !this.isCollapsed;
         console.log("Sidebar toggled " + this.isCollapsed)

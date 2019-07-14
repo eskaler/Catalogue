@@ -34,6 +34,12 @@ $router->group(['prefix' => 'api/order'], function () use ($router){
 
 });
 
+$router->group(['prefix' => 'api/auth'], function () use ($router){
+    
+    $router->post('signin', 'AuthController@signin');
+
+});
+
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
