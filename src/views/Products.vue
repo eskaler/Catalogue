@@ -29,7 +29,7 @@
           <div class="form-group col-xs-4 col-md4 m-2">
             <div class="d-flex flex-column">
               <label for="productTypeList" class="control-label" >Категория</label>
-               <select v-model="selectedProductType" id="productTypeList" class="form-control">
+               <select v-model="selectedProductType" id="productTypeList" class="custom-select">
                   <option value="any" selected>Любая</option>
                   <option v-for="(item, index) in productTypes" :value="item.name" :key="item.name + index">
                    {{ item.caption }}
@@ -76,7 +76,8 @@
                 </ol>
                 <div class="carousel-inner">
                   <div :class="['carousel-item', {'active' : photoIndex == 0 } ]" v-for="(photo, photoIndex) in item.photos" :key="photo.id">
-                    <img class="d-block w-100 card-img-top" :src="photo.server + photo.filename" :alt="photo.server + photo.filename">
+                    <img class="d-block w-100 card-img-top" :src="photo.server + photo.filename" :alt="photo.server + photo.filename"
+                     data-toggle="modal" data-target="#exampleModal3" @click="setPhotoZoom(photo.server + photo.filename, item.caption)">
                   </div>
                 </div>
                 <a class="carousel-control-prev" :href="'#carousele'+index" role="button" data-slide="prev" v-if="item.photos.length > 1">
@@ -125,6 +126,26 @@
         <!--/.Card-->
           </div>
         </div>
+
+        <!-- Photo -->
+        <div class="modal fade" id="exampleModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel3" aria-hidden="true">
+          <div class="modal-dialog modal-lg " role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">{{ photoZoomName }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <img class="d-block w-100" :src="photoZoomSrc"/>
+              </div>
+              <div class="modal-footer">
+                
+              </div>
+            </div>
+          </div>
+        </div>
         </div>
       
 </template>
@@ -140,6 +161,9 @@ export default {
       productTypes: null,
       error: null,
       
+      photoZoomSrc: null,
+      photoZoomName: null,
+      
       productCaption: null,
       selectedProductType: "any",
       priceMin: 0,
@@ -148,6 +172,11 @@ export default {
     }
   },
   methods:{
+    setPhotoZoom: function(src, name){
+      this.photoZoomSrc = src;
+      this.photoZoomName = name;
+      return;
+    },
     addToCart: function(product) {
       this.$emit('added-to-cart', product);
     },
