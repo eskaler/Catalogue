@@ -13,7 +13,9 @@ import './assets/app.scss';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
-import { ClientTable, ServerTable, Event } from 'vue-tables-2';
+
+import { ClientTable, ServerTable, Event} from 'vue-tables-2';
+
 library.add(fas);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
@@ -21,7 +23,7 @@ import './assets/fluent-design-bootstrap/css/fluent.css';
 
 Vue.config.productionTip = false;
 Vue.use(VueAxios, axios);
-Vue.use(ClientTable)
+Vue.use(ClientTable);
 
 new Vue({
   router,

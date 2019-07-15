@@ -1,5 +1,5 @@
 <template>
-  <div class="signin m-4">
+  <div class="container-fluid m-2">
 
     <router-view
       @signed-in="selectAdminPage"

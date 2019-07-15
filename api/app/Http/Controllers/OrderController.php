@@ -34,6 +34,78 @@ class OrderController extends Controller
         //
     }
 
+    public function prolong(Request $request){
+      require "db.php";
+      $conn = oci_connect($dbuser, $dbpassword, $dbname, $dbencoding);         
+      if ( ! $conn ) { 
+          echo "Невозможно подключится к базе: " . var_dump( OCIError() ); 
+          die(); 
+      } 
+
+      $apiKey = $request->input('apiKey');
+      
+      if(apiKeyIsValid($apiKey) != 0){
+        $idOrder = (int)$request->input('idOrder');
+        $orderToProlong = oci_parse($conn, "BEGIN CRM_ORDER_PROLONG(:idOrder); END;"); 
+        oci_bind_by_name($orderToProlong, ':idOrder', $idOrder);
+        oci_execute($orderToProlong, OCI_DEFAULT); 
+        oci_free_statement($orderToProlong);
+        oci_close($conn);
+        return "completed";
+      }
+      else{
+        return "denied";
+      }
+    }
+
+    public function pay(Request $request){
+      require "db.php";
+      $conn = oci_connect($dbuser, $dbpassword, $dbname, $dbencoding);         
+      if ( ! $conn ) { 
+          echo "Невозможно подключится к базе: " . var_dump( OCIError() ); 
+          die(); 
+      } 
+
+      $apiKey = $request->input('apiKey');
+      
+      if(apiKeyIsValid($apiKey) != 0){
+        $idOrder = (int)$request->input('idOrder');
+        $orderToPay = oci_parse($conn, "BEGIN CRM_ORDER_PAID(:idOrder); END;"); 
+        oci_bind_by_name($orderToPay, ':idOrder', $idOrder);
+        oci_execute($orderToPay, OCI_DEFAULT); 
+        oci_free_statement($orderToPay);
+        oci_close($conn);
+        return "completed";
+      }
+      else{
+        return "denied";
+      }
+    }
+
+    public function cancel(Request $request){
+      require "db.php";
+      $conn = oci_connect($dbuser, $dbpassword, $dbname, $dbencoding);         
+      if ( ! $conn ) { 
+          echo "Невозможно подключится к базе: " . var_dump( OCIError() ); 
+          die(); 
+      } 
+
+      $apiKey = $request->input('apiKey');
+      
+      if(apiKeyIsValid($apiKey) != 0){
+        $idOrder = (int)$request->input('idOrder');
+        $orderToCancel = oci_parse($conn, "BEGIN CRM_ORDER_CANCEL(:idOrder); END;"); 
+        oci_bind_by_name($orderToCancel, ':idOrder', $idOrder);
+        oci_execute($orderToCancel, OCI_DEFAULT); 
+        oci_free_statement($orderToCancel);
+        oci_close($conn);
+        return "completed";
+      }
+      else{
+        return "denied";
+      }
+    }
+
     public function all(Request $request){
       require "db.php";
       $conn = oci_connect($dbuser, $dbpassword, $dbname, $dbencoding);         
@@ -53,14 +125,19 @@ class OrderController extends Controller
         while(oci_fetch($orders)){
 
             $productsInOrder = oci_parse($conn, 
-                "select * from V_ORDERPRODUCTS where \"id\" = " . (int)oci_result($orders, "id"));
+                "select * from V_ORDERPRODUCTS where \"idOrder\" = " . (int)oci_result($orders, "id"));
             oci_execute($productsInOrder, OCI_DEFAULT);
             $products = [];
             while(oci_fetch($productsInOrder)){
                $products[] = [
                     'id' => (int)oci_result($productsInOrder, "id"),
-                    'idProduct' => oci_result($productsInOrder, "idProduct"),
-                    'quantity' => (int)oci_result($productsInOrder, "quantity")
+                    'idProduct' => (int)oci_result($productsInOrder, "idProduct"),
+                    'orderQuantity' => (int)oci_result($productsInOrder, "orderQuantity"),
+                    
+                    'name' => oci_result($productsInOrder, "name"),
+                    'caption' => oci_result($productsInOrder, "caption"),
+                    'price' => (float)oci_result($productsInOrder, "price"),
+                    'photo' => oci_result($productsInOrder, "photo"),
                ];
             };
 
@@ -75,9 +152,16 @@ class OrderController extends Controller
                 'products' => $products
             ];
         };
+        oci_free_statement($orders);
+        oci_free_statement($productsInOrder);
+        oci_close($conn);
+
         return json_encode($response);
       }
       else{
+        oci_free_statement($orders);
+        oci_free_statement($productsInOrder);
+        oci_close($conn);
         return "denied";
       }
       

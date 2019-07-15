@@ -1,5 +1,5 @@
 <template>
-  <div class="panel m-4">
+  <div class="panel">
     
     <ul class="nav nav-tabs fluent-tabs" id="myTab" role="tablist">
       <li class="nav-item">
@@ -15,7 +15,48 @@
     <div class="tab-content" id="myTabContent">
       <div class="tab-pane fade show active" id="order" role="tabpanel" aria-labelledby="order-tab">
         <div id="order">
-          <v-client-table :data="orderData"  :columns="orderColumns" :options="orderOptions"></v-client-table>
+          <v-client-table :data="orderData"  :columns="orderColumns" :options="orderOptions">
+            <div slot="child_row" slot-scope="props">
+              <table class="table">
+                <thead >
+                  <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Изображение</th>
+                    <th scope="col">Артикул</th>
+                    <th scope="col">Наименование</th>
+                    <th scope="col">Цена</th>
+                    <th scope="col">Кол-во</th>
+                    <th scope="col">Стоимость</th>
+                    
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="(item, index) in props.row.products" :key="index">
+                    <th scope="row">{{index + 1}}</th>
+                    <td><img class="productPhoto" :src="item.photo" /></td>
+                    <td>{{ item.name }}</td>
+                    <td>{{ item.caption }}</td>
+                    <td>{{ item.price }}₽</td>
+                    <td>{{ item.orderQuantity }}</td>
+                    <td>{{ item.price * item.orderQuantity}}₽</td>
+                  </tr>
+                </tbody>
+                </table>
+              
+            </div>
+            <span slot="orderSum" slot-scope="{row}"> 
+              {{calculateSum(row)}}₽
+            </span>
+            <span slot="prolong" slot-scope="{row}"> 
+              <a href="#" @click="prolongOrder(row)" v-if="row.idOrderState == 1"><font-awesome-icon icon="clock"/></a>
+            </span>
+            <span slot="paid" slot-scope="{row}"> 
+              <a href="#" @click="paidOrder(row)" v-if="row.idOrderState == 1"><font-awesome-icon icon="money-bill"/></a>
+            </span>
+            <span slot="cancel" slot-scope="{row}"> 
+              <a href="#" @click="cancelOrder(row)" v-if="row.idOrderState == 1"><font-awesome-icon icon="window-close"/></a>
+            </span>
+          </v-client-table>
         </div>
       </div>
       <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
@@ -38,7 +79,10 @@ export default {
     return {
 
       orderData: [],
-      orderColumns: ['id', 'customerName', 'customerPhone', 'created', 'expires','orderStateCaption'],
+      orderColumns: 
+        ['id', 'customerName', 'customerPhone', 
+        'created', 'expires','orderStateCaption', 'orderSum' ,
+        'prolong', 'paid', 'cancel'],
       orderOptions:{
         headings: {
           id: '№',
@@ -46,7 +90,12 @@ export default {
           customerPhone: 'Телефон',
           created: 'Дата создания',
           expires: 'Истекает',
-          orderStateCaption: 'Статус'
+          orderStateCaption: 'Статус',
+          orderSum: 'Сумма',
+          prolong: 'Продлить',
+          paid: 'Принять оплату',
+          cancel: 'Отменить'
+
         },
       } ,
       
@@ -74,32 +123,115 @@ export default {
     }
   },
   methods: {
-    
+    prolongOrder: function(order){
+      console.log("prolongOrder called");
+      this.axios
+      .post("http://localhost:8000/api/order/prolong",
+      {
+        apiKey: localStorage.apiKey,
+        idOrder: order.id
+      })
+      .then(response =>{
+        console.log(response.data);
+      })
+      .finally(
+        this.getOrdersData()
+      );
+    },
+    cancelOrder: function(order){
+      console.log("cancelOrder called");
+      this.axios
+      .post("http://localhost:8000/api/order/cancel",
+      {
+        apiKey: localStorage.apiKey,
+        idOrder: order.id
+      })
+      .then(response =>{
+        console.log(response.data);
+      })
+      .finally(
+        this.getOrdersData()
+      );
+    },
+    paidOrder: function(order){
+      console.log("paidOrder called");
+      this.axios
+      .post("http://localhost:8000/api/order/pay",
+      {
+        apiKey: localStorage.apiKey,
+        idOrder: order.id
+      })
+      .then(response =>{
+        console.log(response.data);
+      })
+      .finally(
+        this.getOrdersData()
+      );
+    },
+    calculateSum: function(order){
+      let sum = 0;
+      order.products.forEach(item => {
+        sum += item.orderQuantity * item.price;
+      });
+      return sum;
+    },
+
+    getOrdersData: function(){
+      this.axios
+      .post("http://localhost:8000/api/order/all",
+      {
+        apiKey: localStorage.apiKey
+      })
+      .then(response => {
+        this.orderData = response.data;
+      });
+      return;
+    },
+    getProductsData: function(){
+      this.axios
+      .get("http://localhost:8000/api/product/all")
+      .then(response => {
+        this.productData = response.data;
+      });
+      return;
+    },
+    getProductTypesData: function(){
+      this.axios
+      .get("http://localhost:8000/api/producttype/all")
+      .then(response => {
+        this.productTypeData = response.data;
+      });
+      return;
+    }
   },
   mounted() {
-    this.axios
-    .post("http://localhost:8000/api/order/all",
-    {
-      apiKey: localStorage.apiKey
-    })
-    .then(response => {
-      this.orderData = response.data;
-    });
-
-    this.axios
-    .get("http://localhost:8000/api/product/all")
-    .then(response => {
-      this.productData = response.data;
-    });
-    
-    this.axios
-    .get("http://localhost:8000/api/producttype/all")
-    .then(response => {
-      this.productTypeData = response.data;
-    })
-    
-
-    console.log(this.productData);    
+    this.getOrdersData();
+    this.getProductsData();
+    this.getProductTypesData();  
   }
 }
 </script>
+
+<style>
+.VueTables__child-row-toggler {
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+  display: block;
+  margin: auto;
+  text-align: center;
+}
+
+.VueTables__child-row-toggler--closed::before {
+  content: "+";
+}
+
+.VueTables__child-row-toggler--open::before {
+  content: "-";
+}
+
+.productPhoto{
+  max-height: 50px;
+}
+
+</style>

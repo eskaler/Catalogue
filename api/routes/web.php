@@ -32,6 +32,9 @@ $router->group(['prefix' => 'api/order'], function () use ($router){
     
     $router->post('new', 'OrderController@insert');
     $router->post('all', 'OrderController@all');
+    $router->post('cancel', 'OrderController@cancel');
+    $router->post('pay', 'OrderController@pay');
+    $router->post('prolong', 'OrderController@prolong');
 
 });
 
