@@ -3,4 +3,5 @@
   $dbuser = "shop";
   $dbpassword = "Shop1";
   $dbencoding = "AL32UTF8";
+
 ?>

@@ -31,6 +31,7 @@ $router->group(['prefix' => 'api/producttype'], function () use ($router) {
 $router->group(['prefix' => 'api/order'], function () use ($router){
     
     $router->post('new', 'OrderController@insert');
+    $router->post('all', 'OrderController@all');
 
 });
 
