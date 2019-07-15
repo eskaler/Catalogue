@@ -26,31 +26,36 @@
 export default {
   props: [ 'apiPrefix'],
   name: 'signin',
-  data() {
+  data: function() {
     return {
       login: new String(),
       password: new String(),
-      apiKey: null
     }
   },
   methods: {
     signIn: function(){
+      localStorage.apiKey = null;
       let authData = {
         login: this.login,
         password: this.password
       }
-      console.log("fuck: " + JSON.stringify(authData));
       this.axios
       .post(this.apiPrefix + "api/auth/signin", authData
       )
       .then(response => {
-        //alert(response.data);
-        this.apiKey = (response.data.apiKey == "denied" ? null : response.data.apiKey);
+        //alert(response.data.apiKey);
+        localStorage.apiKey = (response.data.apiKey == "denied" ? null : response.data.apiKey);
       });
-      console.log(`signin ${this.apiKey}`);
-      localStorage.apiKey = this.apiKey;
-      if(this.apiKey != null)
-        this.$emit('signed-in');
+      
+      console.log(`signin ${localStorage.apiKey}`);
+      
+      if(localStorage.apiKey)
+        this.signedIn();
+      
+      return;
+    },
+    signedIn: function(){
+      this.$emit('signed-in');
     }
   }
 }

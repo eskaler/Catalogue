@@ -16,17 +16,11 @@ export default {
   props: ['apiPrefix'],
   name: 'signin',
   
-  data(){
-    return {
-      apiKey: null
-    }
-  },
-  
   methods: {
     selectAdminPage: function(){
-      this.apiKey = localStorage.apiKey;
+      
       console.log("localStorage.apiKey: " + localStorage.apiKey);
-      if(this.apiKey == null){
+      if(!localStorage.apiKey){
         this.$router.push("/admin/signin");
       }
       else {
