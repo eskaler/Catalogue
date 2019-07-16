@@ -51,7 +51,7 @@ class OrderController extends Controller
         oci_execute($orderToProlong, OCI_DEFAULT); 
         oci_free_statement($orderToProlong);
         oci_close($conn);
-        return "completed";
+        return "success";
       }
       else{
         return "denied";
@@ -75,7 +75,7 @@ class OrderController extends Controller
         oci_execute($orderToPay, OCI_DEFAULT); 
         oci_free_statement($orderToPay);
         oci_close($conn);
-        return "completed";
+        return "success";
       }
       else{
         return "denied";
@@ -99,7 +99,7 @@ class OrderController extends Controller
         oci_execute($orderToCancel, OCI_DEFAULT); 
         oci_free_statement($orderToCancel);
         oci_close($conn);
-        return "completed";
+        return "succsess";
       }
       else{
         return "denied";
@@ -159,9 +159,6 @@ class OrderController extends Controller
         return json_encode($response);
       }
       else{
-        oci_free_statement($orders);
-        oci_free_statement($productsInOrder);
-        oci_close($conn);
         return "denied";
       }
       
