@@ -1,5 +1,5 @@
 prompt PL/SQL Developer Export User Objects for user SHOP@LOCALHOST:1521/XE
-prompt Created by Alexey on 12 Ð˜ÑŽÐ»ÑŒ 2019 Ð³.
+prompt Created by Alexey on 16 Ð˜ÑŽÐ»ÑŒ 2019 Ð³.
 set define off
 spool db.log
 
@@ -89,7 +89,8 @@ create table CRM_USER
 (
   id_user    NUMBER not null,
   s_login    VARCHAR2(30) not null,
-  s_password VARCHAR2(30) not null
+  s_password VARCHAR2(65) not null,
+  s_apikey   VARCHAR2(65)
 )
 ;
 comment on table CRM_USER
@@ -100,6 +101,8 @@ comment on column CRM_USER.s_login
   is 'ëîãèí';
 comment on column CRM_USER.s_password
   is 'ïàðîëü';
+comment on column CRM_USER.s_apikey
+  is 'êëþ÷ API';
 alter table CRM_USER
   add constraint ID_USER primary key (ID_USER);
 
@@ -111,7 +114,7 @@ create table CRM_PRODUCT
 (
   id_product     NUMBER not null,
   s_name         VARCHAR2(50) not null,
-  s_caption      VARCHAR2(50) not null,
+  s_caption      VARCHAR2(100) not null,
   s_description  VARCHAR2(1000),
   n_qty          NUMBER not null,
   f_price        FLOAT not null,
@@ -252,7 +255,7 @@ prompt
 create sequence SEQ_ORDER
 minvalue 1
 maxvalue 9999999999999999999999999999
-start with 39
+start with 45
 increment by 1
 cache 20;
 
@@ -263,7 +266,7 @@ prompt
 create sequence SEQ_ORDERPRODUCT
 minvalue 1
 maxvalue 9999999999999999999999999999
-start with 35
+start with 46
 increment by 1
 cache 20;
 
@@ -285,7 +288,7 @@ prompt
 create sequence SEQ_PHOTO
 minvalue 1
 maxvalue 9999999999999999999999999999
-start with 1
+start with 31
 increment by 1
 cache 20;
 
@@ -296,7 +299,7 @@ prompt
 create sequence SEQ_PRODUCT
 minvalue 1
 maxvalue 9999999999999999999999999999
-start with 1
+start with 47
 increment by 1
 cache 20;
 
@@ -307,7 +310,7 @@ prompt
 create sequence SEQ_PRODUCTTYPE
 minvalue 1
 maxvalue 9999999999999999999999999999
-start with 1
+start with 43
 increment by 1
 cache 20;
 
@@ -334,6 +337,55 @@ increment by 1
 cache 20;
 
 prompt
+prompt Creating function CRM_PHOTO_SINGLE
+prompt ==================================
+prompt
+create or replace function CRM_PHOTO_SINGLE(idp_product in number) return varchar2 is
+  photo varchar2(1000);
+begin
+  select S_SERVER||S_FILENAME into photo from CRM_PHOTO where id_product = idp_product and rownum = 1;
+  return(photo);
+end CRM_PHOTO_SINGLE;
+/
+
+prompt
+prompt Creating view V_ORDERPRODUCTS
+prompt =============================
+prompt
+create or replace force view v_orderproducts as
+select
+
+    ID_ORDERPRODUCT as "id",
+    ID_ORDER as "idOrder",
+    ID_PRODUCT as "idProduct",
+    CRM_ORDERPRODUCT.N_QTY as "orderQuantity",
+
+    CRM_PRODUCT.S_NAME as "name",
+    CRM_PRODUCT.S_CAPTION as "caption",
+    CRM_PRODUCT.F_PRICE as "price",
+    CRM_PHOTO_SINGLE(ID_PRODUCT) as "photo"
+
+    from CRM_ORDERPRODUCT
+         join CRM_ORDER using (ID_ORDER)
+         join CRM_PRODUCT using (id_product);
+
+prompt
+prompt Creating view V_ORDERS
+prompt ======================
+prompt
+create or replace force view v_orders as
+select
+  ID_ORDER as "id",
+  S_CUSTOMERNAME as "customerName",
+  S_CUSTOMERPHONE as "customerPhone",
+  D_CREATED as "created",
+  ID_ORDERSTATE as "idOrderState",
+  CRM_ORDERSTATE.S_CAPTION as "orderStateCaption",
+  D_EXPIRES as "expires"
+  from CRM_ORDER join CRM_ORDERSTATE using (id_orderstate)
+  ORDER BY D_CREATED desc;
+
+prompt
 prompt Creating view V_PHOTOS
 prompt ======================
 prompt
@@ -358,10 +410,33 @@ select
        CRM_PRODUCT.n_qty as "quantity",
        F_PRICE as "price",
        CRM_PRODUCTTYPE.S_NAME as "producttype_name",
-       CRM_PRODUCTTYPE.S_CAPTION as "producttype_caption"
+       CRM_PRODUCTTYPE.S_CAPTION as "producttype_caption",
+       Id_Producttype as "producttype_id"
 
   from CRM_PRODUCT
-  join CRM_PRODUCTTYPE using (id_producttype);
+  join CRM_PRODUCTTYPE using (id_producttype)
+where CRM_PRODUCT.N_QTY > 0
+ORDER BY ID_PRODUCT;
+
+prompt
+prompt Creating view V_PRODUCTTYPES
+prompt ============================
+prompt
+create or replace force view v_producttypes as
+select
+       ID_PRODUCTTYPE as "id",
+       S_NAME as "name",
+       S_CAPTION as "caption"
+  from CRM_PRODUCTTYPE
+  order by S_CAPTION;
+
+prompt
+prompt Creating view V_USEREXIST
+prompt =========================
+prompt
+create or replace force view v_userexist as
+select "ID_USER","S_LOGIN","S_PASSWORD","S_APIKEY"
+    from CRM_USER;
 
 prompt
 prompt Creating function CRM_ORDER_INSERT
@@ -400,6 +475,202 @@ begin
   commit;
   return(idv_orderproduct);
 end crm_orderproduct_insert;
+/
+
+prompt
+prompt Creating function CRM_USER_APIKEY_ISVALID
+prompt =========================================
+prompt
+create or replace function CRM_USER_APIKEY_ISVALID(sp_apikey in varchar2) return number is
+  idv_user number;
+begin
+    SELECT id_user into idv_user from CRM_USER where s_apikey = sp_apikey;
+    return(idv_user);
+  EXCEPTION WHEN NO_DATA_FOUND THEN
+    idv_user := 0;
+  return(idv_user);
+end CRM_USER_APIKEY_ISVALID;
+/
+
+prompt
+prompt Creating function CRM_PRODUCT_INSERT
+prompt ====================================
+prompt
+create or replace function crm_product_insert(
+       sp_apikey in varchar2,
+       sp_name in varchar2,
+       sp_caption in varchar2,
+       sp_description in varchar2,
+       np_qty in number,
+       fp_price in float,
+       idp_producttype in number
+       )
+       return number is idv_newProduct number;
+begin
+  idv_newProduct := SEQ_PRODUCT.nextval;
+  insert into CRM_PRODUCT (ID_PRODUCT,
+                           S_NAME,
+                           S_CAPTION,
+                           S_DESCRIPTION,
+                           N_QTY,
+                           F_PRICE,
+                           D_CREATED,
+                           ID_CREATEDBY,
+                           ID_PRODUCTTYPE)
+  VALUES (idv_newProduct, sp_name, sp_caption, sp_description,
+         np_qty, fp_price, SYSDATE, crm_user_apikey_isvalid(sp_apikey), idp_producttype);
+  commit;
+  return idv_newProduct;
+end crm_product_insert;
+/
+
+prompt
+prompt Creating function CRM_PRODUCTTYPE_INSERT
+prompt ========================================
+prompt
+create or replace function crm_producttype_insert(
+       sp_name in varchar2,
+       sp_caption in varchar2
+       )
+       return number is idv_newProductType number;
+begin
+  idv_newProductType := SEQ_PRODUCTTYPE.nextval;
+  insert into CRM_PRODUCTTYPE (ID_PRODUCTTYPE,
+                           S_NAME,
+                           S_CAPTION)
+  VALUES (idv_newProductType, sp_name, sp_caption);
+  commit;
+  return idv_newProductType;
+end crm_producttype_insert;
+/
+
+prompt
+prompt Creating function CRM_USER_SIGNIN
+prompt =================================
+prompt
+create or replace function CRM_USER_SIGNIN(
+       sp_login in varchar2, 
+       sp_password in varchar2) 
+return number is idv_user number;
+begin
+  SELECT id_user into idv_user from CRM_USER where s_login = sp_login and s_password = sp_password ;
+    return(idv_user);
+  EXCEPTION WHEN NO_DATA_FOUND THEN
+    idv_user := 0;
+  return(idv_user);
+end CRM_USER_SIGNIN;
+/
+
+prompt
+prompt Creating procedure CRM_ORDER_CANCEL
+prompt ===================================
+prompt
+create or replace procedure CRM_ORDER_CANCEL(idp_order in number) is
+begin
+FOR vproduct IN (
+  SELECT ID_ORDER, ID_PRODUCT, CRM_ORDERPRODUCT.N_QTY 
+  FROM CRM_ORDERPRODUCT 
+  join CRM_PRODUCT using (id_product) 
+  where id_order = idp_order)
+LOOP
+  UPDATE CRM_PRODUCT 
+  SET CRM_PRODUCT.N_QTY = CRM_PRODUCT.N_QTY + vproduct.N_QTY
+  WHERE CRM_PRODUCT.ID_PRODUCT = vproduct.id_product;
+END LOOP;
+UPDATE CRM_ORDER SET ID_ORDERSTATE = 3 WHERE ID_ORDER = idp_order;
+commit;
+end CRM_ORDER_CANCEL;
+/
+
+prompt
+prompt Creating procedure CRM_ORDER_PAID
+prompt =================================
+prompt
+create or replace procedure CRM_ORDER_PAID(idp_order in number) is
+begin
+  UPDATE CRM_ORDER SET ID_ORDERSTATE = 2 WHERE ID_ORDER = idp_order;
+  commit;
+end CRM_ORDER_PAID;
+/
+
+prompt
+prompt Creating procedure CRM_ORDER_PROLONG
+prompt ====================================
+prompt
+create or replace procedure CRM_ORDER_PROLONG(idp_order in number) is
+begin
+  UPDATE CRM_ORDER SET D_EXPIRES = D_EXPIRES + 10 WHERE ID_ORDER = idp_order;
+  commit;
+end CRM_ORDER_PROLONG;
+/
+
+prompt
+prompt Creating procedure CRM_PRODUCTTYPE_UPDATE
+prompt =========================================
+prompt
+create or replace procedure CRM_PRODUCTTYPE_UPDATE(
+       idp_productType in number,
+       sp_name in varchar2,
+       sp_caption in varchar2
+       )
+       is
+
+begin
+
+  UPDATE CRM_PRODUCTTYPE SET
+    S_NAME = sp_name,
+    S_CAPTION = sp_caption
+  WHERE ID_PRODUCTTYPE = idp_productType;
+
+  commit;
+
+end CRM_PRODUCTTYPE_UPDATE;
+/
+
+prompt
+prompt Creating procedure CRM_PRODUCT_UPDATE
+prompt =====================================
+prompt
+create or replace procedure CRM_PRODUCT_UPDATE(
+       sp_apikey in varchar2,
+       idp_product in number,
+       sp_name in varchar2, 
+       sp_caption in varchar2,
+       sp_description in varchar2,
+       np_qty in number,
+       fp_price in float,
+       idp_producttype in number
+       ) 
+       is
+
+begin
+
+  UPDATE CRM_PRODUCT SET 
+    S_NAME = sp_name,
+    S_CAPTION = sp_caption,
+    S_DESCRIPTION = sp_description,
+    N_QTY = np_qty,
+    F_PRICE = fp_price,
+    D_EDITED = SYSDATE,
+    ID_EDITEDBY = crm_user_apikey_isvalid(sp_apikey),
+    ID_PRODUCTTYPE = idp_producttype
+  WHERE ID_PRODUCT = idp_product;
+
+  commit;
+
+end CRM_PRODUCT_UPDATE;
+/
+
+prompt
+prompt Creating procedure CRM_USER_SETAPIKEY
+prompt =====================================
+prompt
+create or replace procedure CRM_USER_SETAPIKEY(idp_user in number, sp_apikey in varchar2) is
+begin
+  UPDATE CRM_USER SET S_APIKEY = sp_apikey
+  WHERE ID_USER = idp_user;
+  commit;
+end CRM_USER_SETAPIKEY;
 /
 
 
