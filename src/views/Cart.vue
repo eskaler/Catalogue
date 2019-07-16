@@ -59,7 +59,6 @@
       </div>
     </div>
   </div>
-  <p><span v-html="apiResponse"></span></p>
   </div>
 </template>
 

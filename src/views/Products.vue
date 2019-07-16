@@ -81,11 +81,11 @@
                   </div>
                 </div>
                 <a class="carousel-control-prev" :href="'#carousele'+index" role="button" data-slide="prev" v-if="item.photos.length > 1">
-                  <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                  <span class="carousel" aria-hidden="true"><font-awesome-icon icon="angle-left" class="text-dark"/></span>
                   <span class="sr-only">Previous</span>
                 </a>
                 <a class="carousel-control-next" :href="'#carousele'+index" role="button" data-slide="next" v-if="item.photos.length > 1">
-                  <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                  <span class="carousel" aria-hidden="true"><font-awesome-icon icon="angle-right" class="text-dark"/></span>
                   <span class="sr-only">Next</span>
                 </a>
               </div>
@@ -93,17 +93,15 @@
           
             <!--Card content-->
             <div class="card-body">
-              <h4 class="card-title font-weight-bold mb-2">{{ item.caption }}</h4>
-              <span class="badge badge-dark">{{ item.producttype_caption }}</span>
+              <h5 class="card-title font-weight-bold mb-2" >{{ item.caption }} </h5> <span class="badge badge-dark"> {{ item.producttype_caption }}</span>
               <p class="card-text">{{ item.description }}</p>          
             </div>
 
-              <div class="input-group m-3">
-                <input class="form-control" style="width: 10%;" type="number" value="1" min="1" :max="item.quantity" oninput="validity.valid||(value='');" id="example-number-input" v-model="item.orderQuantity">
-                <div class="input-group-addon">
-                  <button class="btn btn-block btn-primary" @click="addToCart(item)"><font-awesome-icon icon="cart-plus"/> В КОРЗИНУ</button>    
-                </div>  
-              </div>
+            <!-- Кнопка В КОРЗИНУ -->
+            <div class="form-row mb-2">
+              <input class="m-2 ml-4" type="number" value="1" min="1" :max="item.quantity" oninput="validity.valid||(value='');" id="example-number-input" v-model="item.orderQuantity">
+              <button class="btn btn-primary" @click="addToCart(item)"><font-awesome-icon icon="cart-plus"/> В КОРЗИНУ</button>    
+            </div>
             
             <!--Footer-->
             <div class="card-footer bg-transparent d-flex justify-content-between">
@@ -119,8 +117,8 @@
           </div>
           <div :key="'divider-sm-'+index" v-if="(index + 1) % 2 == 0" class="w-100 d-none d-sm-block d-md-none"><!-- wrap every 2 on sm--></div>          
           <div :key="'divider-md-'+index" v-if="(index + 1) % 3 == 0" class="w-100 d-none d-md-block d-lg-none"><!-- wrap every 3 on md--></div>
-          <div :key="'divider-lg-'+index" v-if="(index + 1) % 4 == 0" class="w-100 d-none d-lg-block d-xl-none"><!-- wrap every 4 on lg--></div>
-          <div :key="'divider-xl-'+index" v-if="(index + 1) % 5 == 0" class="w-100 d-none d-xl-block"><!-- wrap every 5 on xl--></div>
+          <div :key="'divider-lg-'+index" v-if="(index + 1) % 3 == 0" class="w-100 d-none d-lg-block d-xl-none"><!-- wrap every 4 on lg--></div>
+          <div :key="'divider-xl-'+index" v-if="(index + 1) % 3 == 0" class="w-100 d-none d-xl-block"><!-- wrap every 5 on xl--></div>
           
         </template>
         <!--/.Card-->
@@ -129,7 +127,7 @@
 
         <!-- Photo -->
         <div class="modal fade" id="exampleModal3" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel3" aria-hidden="true">
-          <div class="modal-dialog modal-lg " role="document">
+          <div class="modal-dialog modal-md " role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel3">{{ photoZoomName }}</h5>
@@ -228,6 +226,32 @@ export default {
 </script>
 
 <style>
+
+/*.carousel-control-prev-icon, 
+.carousel-control-next-icon {
+  height: 100px;
+  width: 100px;
+  outline: black;
+  background-size: 100%, 100%;
+  
+  background-image: none;
+}
+
+.carousel-control-next-icon:after
+{
+  content: '>';
+  font-size: 40px;
+  font-weight: bold;
+  color: #E74856;
+}
+
+.carousel-control-prev-icon:after {
+  content: '<';
+  font-size: 40px;
+  font-weight: bold;
+  color: #E74856;
+}*/
+
 .card-img-top {
     width: 100%;
     height: 15vw;
@@ -235,8 +259,5 @@ export default {
     cursor: zoom-in;
 }
 
-.search-bar{
-  
-}
 </style>
 

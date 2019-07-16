@@ -71,13 +71,13 @@
               </v-client-table>
             </div>
             <div class="col-4">
-              <p><label for="">Артикул: </label><input type="text" v-model="viewProduct.name"></p>
-              <p><label for="">Наименование: </label><input type="text" v-model="viewProduct.caption"></p>
-              <p><label for="">Описание: </label><input type="text" v-model="viewProduct.description"></p>
-              <p><label for="">Количество: </label><input type="number" min="0" oninput="validity.valid||(value='');" v-model.number="viewProduct.quantity"></p>
-              <p><label for="">Цена: </label><input type="number" min="0" oninput="validity.valid||(value='');"  v-model.number="viewProduct.price"></p>
-              <p><label for="">Категория товара: </label>
-              <select v-model="viewProduct.producttype_id" id="productTypeList" class="custom-select">
+              <p><label for="inputProductName">Артикул: </label><input id="inputProductName" type="text" class="form-control" v-model="viewProduct.name"></p>
+              <p><label for="inputProductCaption">Наименование: </label><input id="inputProductCaption" type="text" class="form-control" v-model="viewProduct.caption"></p>
+              <p><label for="inputProductDescription">Описание: </label><input id="inputProductDescription" type="text" class="form-control" v-model="viewProduct.description"></p>
+              <p><label for="inputProductQuantity">Количество: </label><input id="inputProductQuantity" type="number" min="0" oninput="validity.valid||(value='');" class="form-control" v-model.number="viewProduct.quantity"></p>
+              <p><label for="inputProductPrice">Цена: </label><input id="inputProductPrice" type="number" min="0" oninput="validity.valid||(value='');" class="form-control" v-model.number="viewProduct.price"></p>
+              <p><label for="inputProductIdProductType">Категория товара: </label>
+              <select class="form-control" v-model="viewProduct.producttype_id" id="inputProductIdProductType">
                   <option v-for="(item, index) in productTypeData" :value="item.id" :key="item.name + index">
                    {{ item.caption }}
                   </option>
@@ -104,8 +104,8 @@
               </v-client-table>
             </div>
             <div class="col-4">
-              <p><label for="">Системное название: </label><input type="text" v-model="viewProductType.name"></p>
-              <p><label for="">Наименование: </label><input type="text" v-model="viewProductType.caption"></p>
+              <p><label for="inputProductTypeName">Системное название: </label><input type="text" class="form-control" v-model="viewProductType.name" id="inputProductTypeName"></p>
+              <p><label for="inputProductTypeCaption">Наименование: </label><input type="text" class="form-control" v-model="viewProductType.caption" id="inputProductTypeCaption"></p>
               <p>
                 <span v-if="viewProductType.id==0"><button class="btn btn-primary" @click="saveNewProductType"><font-awesome-icon icon="plus"/> Создать</button></span>
                 <span v-else><button class="btn btn-primary" @click="saveProductType"><font-awesome-icon icon="save"/> Сохранить</button></span>
@@ -187,7 +187,7 @@ export default {
     prolongOrder: function(order){
       console.log("prolongOrder called");
       this.axios
-      .post("http://localhost:8000/api/order/prolong",
+      .post(this.apiPrefix + "api/order/prolong",
       {
         apiKey: localStorage.apiKey,
         idOrder: order.id
@@ -202,7 +202,7 @@ export default {
     cancelOrder: function(order){
       console.log("cancelOrder called");
       this.axios
-      .post("http://localhost:8000/api/order/cancel",
+      .post(this.apiPrefix + "api/order/cancel",
       {
         apiKey: localStorage.apiKey,
         idOrder: order.id
@@ -217,7 +217,7 @@ export default {
     paidOrder: function(order){
       console.log("paidOrder called");
       this.axios
-      .post("http://localhost:8000/api/order/pay",
+      .post(this.apiPrefix + "api/order/pay",
       {
         apiKey: localStorage.apiKey,
         idOrder: order.id
@@ -239,7 +239,7 @@ export default {
       newProduct.apiKey = localStorage.apiKey;
       console.log(newProduct);
       this.axios
-      .post("http://localhost:8000/api/product/update", newProduct)
+      .post(this.apiPrefix + "api/product/update", newProduct)
       .then(response =>{
         console.log(response.data);
       })
@@ -253,7 +253,7 @@ export default {
       newProduct.apiKey = localStorage.apiKey;
       console.log(newProduct);
       this.axios
-      .post("http://localhost:8000/api/product/new", newProduct)
+      .post(this.apiPrefix + "api/product/new", newProduct)
       .then(response =>{
         console.log(response.data);
       })
@@ -283,7 +283,7 @@ export default {
       newProductType.apiKey = localStorage.apiKey;
       console.log(newProductType);
       this.axios
-      .post("http://localhost:8000/api/producttype/update", newProductType)
+      .post(this.apiPrefix + "api/producttype/update", newProductType)
       .then(response =>{
         console.log(response.data);
       })
@@ -297,7 +297,7 @@ export default {
       newProductType.apiKey = localStorage.apiKey;
       console.log(newProductType);
       this.axios
-      .post("http://localhost:8000/api/producttype/new", newProductType)
+      .post(this.apiPrefix + "api/producttype/new", newProductType)
       .then(response =>{
         console.log(response.data);
       })
@@ -323,7 +323,7 @@ export default {
 
     getOrdersData: function(){
       this.axios
-      .post("http://localhost:8000/api/order/all",
+      .post(this.apiPrefix + "api/order/all",
       {
         apiKey: localStorage.apiKey
       })
@@ -334,7 +334,7 @@ export default {
     },
     getProductsData: function(){
       this.axios
-      .get("http://localhost:8000/api/product/all")
+      .get(this.apiPrefix + "api/product/all")
       .then(response => {
         this.productData = response.data;
       });
@@ -342,7 +342,7 @@ export default {
     },
     getProductTypesData: function(){
       this.axios
-      .get("http://localhost:8000/api/producttype/all")
+      .get(this.apiPrefix + "api/producttype/all")
       .then(response => {
         this.productTypeData = response.data;
       });
@@ -358,6 +358,7 @@ export default {
 </script>
 
 <style>
+
 .VueTables__child-row-toggler {
   width: 16px;
   height: 16px;

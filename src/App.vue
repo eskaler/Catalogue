@@ -97,6 +97,8 @@ export default{
     align-items: stretch;
 }
 .sidebar {
+    
+    
     min-width: 250px;
     max-width: 250px;
     min-height: 100vh;
