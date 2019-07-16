@@ -61,12 +61,58 @@
       </div>
       <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
         <div id="product">
-          <v-client-table :data="productData"  :columns="productColumns" :options="productOptions"></v-client-table>
+          <div class="row">
+            <div class="col-8">
+              <p><button class="btn btn-primary" @click="newProduct"><font-awesome-icon icon="plus"/> Новый</button></p>
+              <v-client-table :data="productData"  :columns="productColumns" :options="productOptions">
+                <span slot="edit" slot-scope="{row}"> 
+                  <a href="#" @click="editProduct(row)"><font-awesome-icon icon="edit"/></a>
+                </span>
+              </v-client-table>
+            </div>
+            <div class="col-4">
+              <p><label for="">Артикул: </label><input type="text" v-model="viewProduct.name"></p>
+              <p><label for="">Наименование: </label><input type="text" v-model="viewProduct.caption"></p>
+              <p><label for="">Описание: </label><input type="text" v-model="viewProduct.description"></p>
+              <p><label for="">Количество: </label><input type="number" min="0" oninput="validity.valid||(value='');" v-model.number="viewProduct.quantity"></p>
+              <p><label for="">Цена: </label><input type="number" min="0" oninput="validity.valid||(value='');"  v-model.number="viewProduct.price"></p>
+              <p><label for="">Категория товара: </label>
+              <select v-model="viewProduct.producttype_id" id="productTypeList" class="custom-select">
+                  <option v-for="(item, index) in productTypeData" :value="item.id" :key="item.name + index">
+                   {{ item.caption }}
+                  </option>
+               </select></p>
+               <p>
+                 <span v-if="viewProduct.id==0"><button class="btn btn-primary" @click="saveNewProduct"><font-awesome-icon icon="plus"/> Создать</button></span>
+                 <span v-else><button class="btn btn-primary" @click="saveProduct"><font-awesome-icon icon="save"/> Сохранить</button></span>
+                 </p>
+            </div>
+          </div>
+          
+
         </div>
       </div>
       <div class="tab-pane fade" id="producttype" role="tabpanel" aria-labelledby="producttype-tab">
         <div id="productType">
-          <v-client-table :data="productTypeData" :columns="productTypeColumns" :options="productTypeOptions"></v-client-table>
+          <div class="row">
+            <div class="col-8">
+              <p><button class="btn btn-primary" @click="newProductType"><font-awesome-icon icon="plus"/> Новый</button></p>
+              <v-client-table :data="productTypeData"  :columns="productTypeColumns" :options="productTypeOptions">
+                <span slot="edit" slot-scope="{row}"> 
+                  <a href="#" @click="editProductType(row)"><font-awesome-icon icon="edit"/></a>
+                </span>
+              </v-client-table>
+            </div>
+            <div class="col-4">
+              <p><label for="">Системное название: </label><input type="text" v-model="viewProductType.name"></p>
+              <p><label for="">Наименование: </label><input type="text" v-model="viewProductType.caption"></p>
+              <p>
+                <span v-if="viewProductType.id==0"><button class="btn btn-primary" @click="saveNewProductType"><font-awesome-icon icon="plus"/> Создать</button></span>
+                <span v-else><button class="btn btn-primary" @click="saveProductType"><font-awesome-icon icon="save"/> Сохранить</button></span>
+              </p>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -100,24 +146,39 @@ export default {
       } ,
       
       productData: [],
-      productColumns: ['id', 'name', 'caption', 'price', 'quantity'],
+      productColumns: ['id', 'name', 'caption', 'price', 'quantity', 'edit'],
       productOptions: {
         headings: {
           name: 'Артикул',
           caption: 'Наименование',
           price: 'Цена',
-          quantity: 'Количество'
-        },
-        
+          quantity: 'Количество',
+          edit: 'Изменить'
+        },    
+      },
+      viewProduct: {
+        id: 0,
+        name: '',
+        caption: '',
+        description: '',
+        quantity: 0,
+        price: 0,
+        producttype_id: 0
       },
 
       productTypeData: [],
-      productTypeColumns: ['id', 'name', 'caption'],
+      productTypeColumns: ['id', 'name', 'caption', 'edit'],
       productTypeOptions: {
-      headings: {
+        headings: {
           name: 'Системное название',
           caption: 'Наименование',
+          edit: 'Изменить'
         },
+      },
+      viewProductType: {
+        id: 0,
+        name: '',
+        caption: '',
       },
 
     }
@@ -168,6 +229,90 @@ export default {
         this.getOrdersData()
       );
     },
+
+    editProduct: function(product){
+      this.viewProduct = product;
+    },
+    saveProduct: function(){
+      console.log("newProduct called");
+      let newProduct = this.viewProduct;
+      newProduct.apiKey = localStorage.apiKey;
+      console.log(newProduct);
+      this.axios
+      .post("http://localhost:8000/api/product/update", newProduct)
+      .then(response =>{
+        console.log(response.data);
+      })
+      .finally(
+        this.getProductsData()
+      );
+    },
+    saveNewProduct: function(){
+      console.log("saveNewProduct called");
+      let newProduct = this.viewProduct;
+      newProduct.apiKey = localStorage.apiKey;
+      console.log(newProduct);
+      this.axios
+      .post("http://localhost:8000/api/product/new", newProduct)
+      .then(response =>{
+        console.log(response.data);
+      })
+      .finally(
+        this.getProductsData()
+      );
+    },
+    newProduct: function(product){
+      this.viewProduct = {
+        id: 0,
+        name: '',
+        caption: '',
+        description: '',
+        quantity: 0,
+        price: 0,
+        productTypeCaption: '',
+        productTypeId: 0,
+      };
+    },
+
+    editProductType: function(productType){
+      this.viewProductType = productType;
+    },
+    saveProductType: function(){
+      console.log("newProductType called");
+      let newProductType = this.viewProductType;
+      newProductType.apiKey = localStorage.apiKey;
+      console.log(newProductType);
+      this.axios
+      .post("http://localhost:8000/api/producttype/update", newProductType)
+      .then(response =>{
+        console.log(response.data);
+      })
+      .finally(
+        this.getProductsTypeData()
+      );
+    },
+    saveNewProductType: function(){
+      console.log("saveNewProductType called");
+      let newProductType = this.viewProductType;
+      newProductType.apiKey = localStorage.apiKey;
+      console.log(newProductType);
+      this.axios
+      .post("http://localhost:8000/api/producttype/new", newProductType)
+      .then(response =>{
+        console.log(response.data);
+      })
+      .finally(
+        this.getProductsTypeData()
+      );
+    },
+    newProductType: function(product){
+      this.viewProductType = {
+        id: 0,
+        name: '',
+        caption: '',
+      };
+    },
+
     calculateSum: function(order){
       let sum = 0;
       order.products.forEach(item => {

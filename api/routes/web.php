@@ -18,19 +18,23 @@ $router->group(['prefix' => 'api/product'], function () use ($router) {
     'ProductController@search');
     $router->get('searchname/caption/{caption}',
     'ProductController@searchname');
+    $router->post('new', 'ProductController@new');
+    $router->post('update', 'ProductController@update');
 
 });
 
 $router->group(['prefix' => 'api/producttype'], function () use ($router) {
     
     $router->get('all', 'ProductTypeController@all');
+    $router->post('new', 'ProductTypeController@new');
+    $router->post('update', 'ProductTypeController@update');
     
 
 });
 
 $router->group(['prefix' => 'api/order'], function () use ($router){
     
-    $router->post('new', 'OrderController@insert');
+    $router->post('new', 'OrderController@new');
     $router->post('all', 'OrderController@all');
     $router->post('cancel', 'OrderController@cancel');
     $router->post('pay', 'OrderController@pay');

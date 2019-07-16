@@ -103,7 +103,7 @@ export default {
         console.log(pdfMake);
         let tableContents = [];
         tableContents.push(["№", "Артикул", "Наименование", "Цена", "Кол-во", "Стоимость"]);
-        let i = 1;
+        let i = 0;
         this.cartProducts.forEach(product => {
           tableContents.push([++i, product["name"], product["caption"], product["price"],
                               product["orderQuantity"], product["price"]*product["orderQuantity"]]);

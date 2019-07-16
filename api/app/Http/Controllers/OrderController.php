@@ -167,7 +167,7 @@ class OrderController extends Controller
       
     }
 
-    public function insert(Request $request){
+    public function new(Request $request){
       require "db.php";
 
       $conn = oci_connect($dbuser, $dbpassword, $dbname, $dbencoding);         
