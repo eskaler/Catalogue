@@ -20,6 +20,7 @@ $router->group(['prefix' => 'api/product'], function () use ($router) {
     'ProductController@searchname');
     $router->post('new', 'ProductController@new');
     $router->post('update', 'ProductController@update');
+    $router->post('{idProduct}', 'ProductController@getSingle');
 
 });
 
@@ -29,6 +30,12 @@ $router->group(['prefix' => 'api/producttype'], function () use ($router) {
     $router->post('new', 'ProductTypeController@new');
     $router->post('update', 'ProductTypeController@update');
     
+
+});
+
+$router->group(['prefix' => 'api/photo'], function () use ($router) {
+    
+    $router->post('new', 'PhotoController@new');    
 
 });
 

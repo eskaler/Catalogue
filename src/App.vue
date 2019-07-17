@@ -47,7 +47,7 @@ export default{
     return {
       isCollapsed: true,
       cartProducts: [],
-      apiPrefix: "http://localhost:8000/",
+      apiPrefix: "",
       apiKey: null
     }
   },

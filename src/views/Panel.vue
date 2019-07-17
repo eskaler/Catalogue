@@ -1,6 +1,7 @@
 <template>
   <div class="panel">
     
+    
     <ul class="nav nav-tabs fluent-tabs" id="myTab" role="tablist">
       <li class="nav-item">
         <a class="nav-link active" id="order-tab" data-toggle="tab" href="#order" role="tab" aria-controls="order" aria-selected="true">Заказы</a>
@@ -14,6 +15,7 @@
     </ul>
     <div class="tab-content" id="myTabContent">
       <div class="tab-pane fade show active" id="order" role="tabpanel" aria-labelledby="order-tab">
+        <!--#region Tabs -->
         <div id="order">
           <v-client-table :data="orderData"  :columns="orderColumns" :options="orderOptions">
             <div slot="child_row" slot-scope="props">
@@ -58,64 +60,194 @@
             </span>
           </v-client-table>
         </div>
+        <!--#endregion -->
       </div>
       <div class="tab-pane fade" id="product" role="tabpanel" aria-labelledby="product-tab">
         <div id="product">
-          <div class="row">
-            <div class="col-8">
-              <p><button class="btn btn-primary" @click="newProduct"><font-awesome-icon icon="plus"/> Новый</button></p>
-              <v-client-table :data="productData"  :columns="productColumns" :options="productOptions">
+          <p><button class="btn btn-primary" @click="newProduct" data-toggle="modal" data-target="#productModal"><font-awesome-icon icon="plus"/> Новый</button></p>
+          <v-client-table :data="productData"  :columns="productColumns" :options="productOptions">
+            <span slot="edit" slot-scope="{row}"> 
+              <a href="#" @click="editProduct(row)" data-toggle="modal" data-target="#productModal"><font-awesome-icon icon="edit"/></a>
+            </span>
+          </v-client-table>
+        </div>
+          
+
+        </div>
+
+              <div class="tab-pane fade" id="producttype" role="tabpanel" aria-labelledby="producttype-tab">
+        <div id="productType">
+          
+              <p><button class="btn btn-primary" @click="newProductType" data-toggle="modal" data-target="#productTypeModal"><font-awesome-icon icon="plus"/> Новый</button></p>
+              <v-client-table :data="productTypeData"  :columns="productTypeColumns" :options="productTypeOptions">
                 <span slot="edit" slot-scope="{row}"> 
-                  <a href="#" @click="editProduct(row)"><font-awesome-icon icon="edit"/></a>
+                  <a href="#" @click="editProductType(row)" data-toggle="modal" data-target="#productTypeModal"><font-awesome-icon icon="edit"/></a>
                 </span>
               </v-client-table>
-            </div>
-            <div class="col-4">
-              <p><label for="inputProductName">Артикул: </label><input id="inputProductName" type="text" class="form-control" v-model="viewProduct.name"></p>
-              <p><label for="inputProductCaption">Наименование: </label><input id="inputProductCaption" type="text" class="form-control" v-model="viewProduct.caption"></p>
-              <p><label for="inputProductDescription">Описание: </label><input id="inputProductDescription" type="text" class="form-control" v-model="viewProduct.description"></p>
-              <p><label for="inputProductQuantity">Количество: </label><input id="inputProductQuantity" type="number" min="0" oninput="validity.valid||(value='');" class="form-control" v-model.number="viewProduct.quantity"></p>
-              <p><label for="inputProductPrice">Цена: </label><input id="inputProductPrice" type="number" min="0" oninput="validity.valid||(value='');" class="form-control" v-model.number="viewProduct.price"></p>
-              <p><label for="inputProductIdProductType">Категория товара: </label>
+          
+
+          
+
+        </div>
+      </div>
+      </div>
+
+
+
+        <!-- MODALS -->
+
+        <!-- PRODUCT MODAL -->
+        <div class="modal fade" id="productModal" tabindex="-1" role="dialog" aria-labelledby="productModal" aria-hidden="true">
+          <div :class="['modal-dialog', { 'modal-md' : photoZoomToggle}, {'modal-lg' : !photoZoomToggle}]" role="document">
+
+                <div class="modal-content" v-if="photoZoomToggle">
+                <div class="modal-header">
+                  <a href="#" @click="photoZoomToggle = !photoZoomToggle" ><font-awesome-icon icon="arrow-left"/></a>
+                  <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <img class="d-block w-100" :src="photoZoomSrc"/>
+                </div>
+                <div class="modal-footer">    
+                </div>
+              </div>
+
+            <div class="modal-content" v-else>
+
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">{{ viewProduct.caption }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+
+              <div class="modal-body">
+                <div class="row">
+                  <div class="col-sm">
+                    <p><label for="inputProductName">Артикул </label><input id="inputProductName" type="text" class="form-control" v-model="viewProduct.name"></p>
+                  </div>
+                  <div class="col-sm">
+                    <p><label for="inputProductCaption">Наименование </label><input id="inputProductCaption" type="text" class="form-control" v-model="viewProduct.caption"></p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-sm">
+<p><label for="inputProductDescription">Описание </label><input id="inputProductDescription" type="text" class="form-control" v-model="viewProduct.description"></p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-3">
+<p><label for="inputProductQuantity">Количество </label><input id="inputProductQuantity" type="number" min="0" oninput="validity.valid||(value='');" class="form-control" v-model.number="viewProduct.quantity"></p>
+                  </div>
+                  <div class="col-3"><p><label for="inputProductPrice">Цена </label><input id="inputProductPrice" type="number" min="0" oninput="validity.valid||(value='');" class="form-control" v-model.number="viewProduct.price"></p></div>
+                  <div class="col-6">
+                    <p><label for="inputProductIdProductType">Категория товара </label>
               <select class="form-control" v-model="viewProduct.producttype_id" id="inputProductIdProductType">
                   <option v-for="(item, index) in productTypeData" :value="item.id" :key="item.name + index">
                    {{ item.caption }}
                   </option>
                </select></p>
-               <p>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <div class="view">
+                      <div id="carousele" class="carousel slide" data-ride="carousel">
+                        <ol class="carousel-indicators" v-if="renderCarousel && viewProduct.photos.length > 1">
+                          <li data-target="carousele" v-for="(photo, photoIndex) in viewProduct.photos" :key="photo.id"
+                          :data-slide-to="photoIndex" class="active"></li>
+                        </ol>
+                        <div class="carousel-inner">
+                          <div :class="['carousel-item', {'active' : photoIndex == 0 } ]" v-for="(photo, photoIndex) in viewProduct.photos" :key="photo.id">
+                            <img class="card-img-top" :src="photo.server + photo.filename" :alt="photo.server + photo.filename"
+                            data-toggle="modal" data-target="#exampleModal3" @click="setPhotoZoom(photo.server + photo.filename, viewProduct.caption)">
+                          </div>
+                        </div>
+                        <a class="carousel-control-prev" href="#carousele" role="button" data-slide="prev" v-if="viewProduct.photos.length > 1">
+                          <span class="carousel" aria-hidden="true"><font-awesome-icon icon="angle-left" class="text-dark"/></span>
+                          <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#carousele" role="button" data-slide="next" v-if="viewProduct.photos.length > 1">
+                          <span class="carousel" aria-hidden="true"><font-awesome-icon icon="angle-right" class="text-dark"/></span>
+                          <span class="sr-only">Next</span>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-6">
+                    <div v-if="!image">
+                      <p>Загрузить изображение</p>
+                      <input type="file" @change="onFileChange">
+                    </div>
+                    <div v-else>
+                      <img :src="image" class="card-img-top" />
+                      <button @click="removeImage" class="btn btn-default">Удалить</button>
+                      <button @click="uploadImage" class="btn btn-default">Загрузить</button>
+                    </div>
+                  </div>
+                </div>
+                
+
+              </div>
+              <div class="modal-footer">
+                <p>
                  <span v-if="viewProduct.id==0"><button class="btn btn-primary" @click="saveNewProduct"><font-awesome-icon icon="plus"/> Создать</button></span>
                  <span v-else><button class="btn btn-primary" @click="saveProduct"><font-awesome-icon icon="save"/> Сохранить</button></span>
                  </p>
+              </div>
             </div>
           </div>
-          
-
         </div>
-      </div>
-      <div class="tab-pane fade" id="producttype" role="tabpanel" aria-labelledby="producttype-tab">
-        <div id="productType">
-          <div class="row">
-            <div class="col-8">
-              <p><button class="btn btn-primary" @click="newProductType"><font-awesome-icon icon="plus"/> Новый</button></p>
-              <v-client-table :data="productTypeData"  :columns="productTypeColumns" :options="productTypeOptions">
-                <span slot="edit" slot-scope="{row}"> 
-                  <a href="#" @click="editProductType(row)"><font-awesome-icon icon="edit"/></a>
-                </span>
-              </v-client-table>
-            </div>
-            <div class="col-4">
-              <p><label for="inputProductTypeName">Системное название: </label><input type="text" class="form-control" v-model="viewProductType.name" id="inputProductTypeName"></p>
-              <p><label for="inputProductTypeCaption">Наименование: </label><input type="text" class="form-control" v-model="viewProductType.caption" id="inputProductTypeCaption"></p>
-              <p>
+
+        <!-- PRODUCTTYPE MODAL -->
+        <div class="modal fade" id="productTypeModal" tabindex="-1" role="dialog" aria-labelledby="productTypeModal" aria-hidden="true">
+          <div class="modal-dialog modal-md " role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                 <p><label for="inputProductTypeName">Системное название </label><input type="text" class="form-control" v-model="viewProductType.name" id="inputProductTypeName"></p>
+              <p><label for="inputProductTypeCaption">Наименование </label><input type="text" class="form-control" v-model="viewProductType.caption" id="inputProductTypeCaption"></p>
+              
+               
+              </div>
+              <div class="modal-footer">
+               <p>
                 <span v-if="viewProductType.id==0"><button class="btn btn-primary" @click="saveNewProductType"><font-awesome-icon icon="plus"/> Создать</button></span>
                 <span v-else><button class="btn btn-primary" @click="saveProductType"><font-awesome-icon icon="save"/> Сохранить</button></span>
               </p>
+              </div>
             </div>
           </div>
-
         </div>
-      </div>
-    </div>
+
+        <!-- PHOTO ZOOM MODAL -->
+        <div class="modal fade" id="photoZoomModal" tabindex="-2" role="dialog" aria-labelledby="photoZoomModal" aria-hidden="true">
+          <div class="modal-dialog modal-md " role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel3">{{ photoZoomName }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <img class="d-block w-100" :src="photoZoomSrc"/>
+              </div>
+              <div class="modal-footer">
+                
+              </div>
+            </div>
+          </div>
+        </div>
+
+
   </div>
 </template>
 <script>
@@ -123,6 +255,11 @@ export default {
   props: ['apiPrefix'],
   data() {
     return {
+      photoZoomSrc: null,
+      photoZoomName: null,
+      photoZoomToggle: false,
+      photoFile: null,
+      image: '',
 
       orderData: [],
       orderColumns: 
@@ -142,7 +279,7 @@ export default {
           paid: 'Принять оплату',
           cancel: 'Отменить'
 
-        },
+        }
       } ,
       
       productData: [],
@@ -154,7 +291,7 @@ export default {
           price: 'Цена',
           quantity: 'Количество',
           edit: 'Изменить'
-        },    
+        }
       },
       viewProduct: {
         id: 0,
@@ -163,7 +300,8 @@ export default {
         description: '',
         quantity: 0,
         price: 0,
-        producttype_id: 0
+        producttype_id: 0,
+        photos: []
       },
 
       productTypeData: [],
@@ -180,10 +318,84 @@ export default {
         name: '',
         caption: '',
       },
-
+      renderCarousel: true
     }
   },
   methods: {
+    forceCarouselRerender() {
+      console.log("called");
+        // Remove my-component from the DOM
+        this.renderCarousel = false;
+        
+        this.$nextTick(() => {
+          // Add the component back in
+          this.renderCarousel = true;
+        });
+    },
+    setPhotoZoom: function(src, name){
+      this.photoZoomSrc = src;
+      this.photoZoomName = name;
+      this.photoZoomToggle = true;
+      return;
+    },
+    onFileChange(e) {
+      var files = e.target.files || e.dataTransfer.files;
+      if (!files.length)
+        return;
+      this.createImage(files[0]);
+    },
+    createImage(file) {
+      var image = new Image();
+      var reader = new FileReader();
+      var vm = this;
+
+      reader.onload = (e) => {
+        vm.image = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    },
+    removeImage: function (e) {
+      this.image = '';
+    },
+    uploadImage: function() {
+      console.log(this.image);
+      let newPhoto = {
+        apiKey: localStorage.apiKey,
+        idProduct: this.viewProduct.id,
+        image: this.image
+      };
+      console.log(newPhoto);
+      this.axios
+      .post(this.apiPrefix + "api/photo/new",
+      newPhoto)
+      .then(
+        this.getProductsData()
+      )
+      .then(
+        this.getViewProduct()
+      )
+      .finally(
+        this.image=''
+      );
+      
+    },
+    getViewProduct: function(){
+      this.productData.forEach(product => {
+        if(product.id == this.viewProduct.id){
+          this.viewProduct = product;
+          this.forceCarouselRerender();
+          return;
+        }
+      });
+    },
+    getProductData: function(idProduct){
+      this.axios
+      .get(this.apiPrefix + `api/product/${idProduct}`)
+      .then(
+        this.viewProduct = response.data
+      );
+    },
+
     prolongOrder: function(order){
       console.log("prolongOrder called");
       this.axios
@@ -232,6 +444,7 @@ export default {
 
     editProduct: function(product){
       this.viewProduct = product;
+      this.photoZoomToggle = false;
     },
     saveProduct: function(){
       console.log("newProduct called");
@@ -271,6 +484,7 @@ export default {
         price: 0,
         productTypeCaption: '',
         productTypeId: 0,
+        photos: []
       };
     },
 
@@ -340,6 +554,7 @@ export default {
       });
       return;
     },
+    
     getProductTypesData: function(){
       this.axios
       .get(this.apiPrefix + "api/producttype/all")
@@ -358,6 +573,12 @@ export default {
 </script>
 
 <style>
+.card-img-top {
+    width: 100%;
+    height: 15vw;
+    object-fit: cover;
+    cursor: zoom-in;
+}
 
 .VueTables__child-row-toggler {
   width: 16px;

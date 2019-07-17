@@ -225,5 +225,7 @@ class ProductController extends Controller
         return json_encode($response);
     }
 
+    
+
     //
 }
