@@ -22,6 +22,7 @@ Vue.component('font-awesome-icon', FontAwesomeIcon);
 import './assets/fluent-design-bootstrap/css/fluent.css';
 
 Vue.config.productionTip = false;
+
 Vue.use(VueAxios, axios);
 Vue.use(ClientTable);
 

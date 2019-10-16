@@ -38,7 +38,7 @@ export default {
       let authData = {
         login: this.login,
         password: this.password
-      }
+      };
       this.axios
       .post(this.apiPrefix + "api/auth/signin", authData
       )
